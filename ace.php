@@ -1698,6 +1698,12 @@ ErrorHandler::cek(function(){
         $html = new HtmlContainer();
         $html->head([
             "title" => "Code Editor",
+            "meta" => [
+                [
+                    "name" => "robots",
+                    "content" => "noindex"
+                ]
+            ],
             "css" => [
                 "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
                 ,"https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
@@ -1729,6 +1735,12 @@ ErrorHandler::cek(function(){
         $html = new HtmlContainer();
         $html->head([
             "title" => "Login - Code Editor",
+            "meta" => [
+                [
+                    "name" => "robots",
+                    "content" => "noindex"
+                ]
+            ],
             "css" => [
                 "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
                 ,"https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
