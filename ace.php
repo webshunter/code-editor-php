@@ -100,7 +100,7 @@ class Environtment{
         }
    }
     
-  public function setEnv($name="", $val = ""){
+  public static function setEnv($name="", $val = ""){
       if(!defined($name)){
           $_ENV[$name] = $val;
           define($name, $val);
@@ -262,7 +262,7 @@ class Files
         return $er;
     }
     
-    function dir($directory = "./") {
+    public static function dir($directory = "./") {
         // Get the list of files and folders in the directory
         $contents = scandir($directory);
     
@@ -713,8 +713,13 @@ class Route {
 
 // template home html
 try{
-$GLOBALS[contentBody] = <<<EOT
-
+$GLOBALS['contentBody'] = <<<EOT
+    <style>
+        .resize-bar {
+          cursor: col-resize;
+          background-color: transparent;
+        }
+    </style>
     <!-- Main modal -->
     <div id="default-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
         <div class="relative p-4 w-full max-w-2xl max-h-full">
@@ -744,19 +749,30 @@ $GLOBALS[contentBody] = <<<EOT
         </div>
     </div>
 
-    <div style="display:grid; grid-template-columns: 320px auto;background:#444;" class="h-full">
-        <div style="overflow:autoload;background:rgba(0, 0, 0, 0.9) !important;">
+    <div style="display:grid; grid-template-columns: auto 5px auto;background:#444;" class="h-full" id="gridContainer">
+        <div style="overflow:autoload;background:rgba(0, 0, 0, 0.9) !important;" id="item1">
             <div style="display:grid; grid-template-rows: 60px auto;">
                 <div style="background:#444;display:flex; align-items:center; font-weight:bold; justify-content:center;">
                     <h1 class="text-white text-[14pt]"><> IW Code</h1>
                 </div>
                 <div style="height:calc(100vh - 60px);max-height:calc(100vh - 60px);min-height:calc(100vh - 60px); display:grid; grid-template-columns: 50px auto;">
-                    <div style="background:#333;"></div>
+                    <div style="background:#333;">
+                        <div style="display:flex;justify-content:center;align-items:center;padding:10px 0px;cursor:pointer;">
+                            <img 
+                                src="data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KCjwhLS0gVXBsb2FkZWQgdG86IFNWRyBSZXBvLCB3d3cuc3ZncmVwby5jb20sIFRyYW5zZm9ybWVkIGJ5OiBTVkcgUmVwbyBNaXhlciBUb29scyAtLT4KPHN2ZyB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+Cgo8ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCIvPgoKPGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cgo8ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxwYXRoIGQ9Ik0zIDguMkMzIDcuMDc5ODkgMyA2LjUxOTg0IDMuMjE3OTkgNi4wOTIwMkMzLjQwOTczIDUuNzE1NjkgMy43MTU2OSA1LjQwOTczIDQuMDkyMDIgNS4yMTc5OUM0LjUxOTg0IDUgNS4wNzk5IDUgNi4yIDVIOS42NzQ1MkMxMC4xNjM3IDUgMTAuNDA4MyA1IDEwLjYzODUgNS4wNTUyNkMxMC44NDI1IDUuMTA0MjUgMTEuMDM3NiA1LjE4NTA2IDExLjIxNjYgNS4yOTQ3MkMxMS40MTg0IDUuNDE4NCAxMS41OTE0IDUuNTkxMzUgMTEuOTM3MyA1LjkzNzI2TDEyLjA2MjcgNi4wNjI3NEMxMi40MDg2IDYuNDA4NjUgMTIuNTgxNiA2LjU4MTYgMTIuNzgzNCA2LjcwNTI4QzEyLjk2MjQgNi44MTQ5NCAxMy4xNTc1IDYuODk1NzUgMTMuMzYxNSA2Ljk0NDc0QzEzLjU5MTcgNyAxMy44MzYzIDcgMTQuMzI1NSA3SDE3LjhDMTguOTIwMSA3IDE5LjQ4MDIgNyAxOS45MDggNy4yMTc5OUMyMC4yODQzIDcuNDA5NzMgMjAuNTkwMyA3LjcxNTY5IDIwLjc4MiA4LjA5MjAyQzIxIDguNTE5ODQgMjEgOS4wNzk5IDIxIDEwLjJWMTUuOEMyMSAxNi45MjAxIDIxIDE3LjQ4MDIgMjAuNzgyIDE3LjkwOEMyMC41OTAzIDE4LjI4NDMgMjAuMjg0MyAxOC41OTAzIDE5LjkwOCAxOC43ODJDMTkuNDgwMiAxOSAxOC45MjAxIDE5IDE3LjggMTlINi4yQzUuMDc5ODkgMTkgNC41MTk4NCAxOSA0LjA5MjAyIDE4Ljc4MkMzLjcxNTY5IDE4LjU5MDMgMy40MDk3MyAxOC4yODQzIDMuMjE3OTkgMTcuOTA4QzMgMTcuNDgwMiAzIDE2LjkyMDEgMyAxNS44VjguMloiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPC9nPgoKPC9zdmc+"
+                                style="display:inline-block;"
+                            />
+                        </div>
+                        <div class="text-white" style="display:flex;justify-content:center;align-items:center;padding:10px 0px;cursor:pointer;">
+                            <i style="font-size:20px;" class="fab fa-windows"></i>
+                        </div>
+                    </div>
                     <div height="100vh" style="max-height:calc(100vh - 60px);overflow:auto;" id="folder-show"></div>
                 </div>
             </div>
         </div>
-        <div style="display:grid; grid-template-rows: 60px auto;">
+        <div class="resize-bar" style="background:#333;" id="resizeBar"></div>
+        <div style="display:grid; grid-template-rows: 60px auto;" id="item2">
             <div>
                 <button style="display:none;" id="modal-open" data-modal-target="default-modal" data-modal-toggle="default-modal" 
                 class="
@@ -1163,10 +1179,47 @@ EOT;
 // template script
 try{
 $GLOBALS["contentScript"] = <<<'EOT'
+
+    const resizeBar = document.getElementById('resizeBar');
+    const item1 = document.getElementById('item1');
+    const item2 = document.getElementById('item2');
+    const gridContainer = document.getElementById('gridContainer');
+    
+    let isResizing = false;
+    let lastX = 0;
+    
+    resizeBar.addEventListener('mousedown', (e) => {
+      isResizing = true;
+      lastX = e.clientX;
+    
+      e.preventDefault();
+    });
+    
+    document.addEventListener('mouseup', () => {
+      isResizing = false;
+    });
+    
+    document.addEventListener('mousemove', (e) => {
+      if (!isResizing) return;
+    
+      const deltaX = e.clientX - lastX;
+      const item1Width = item1.offsetWidth + deltaX;
+      const item2Width = item2.offsetWidth - deltaX;
+    
+      if (item1Width >= 100 && item2Width >= 100) { // Set minimum width for items
+        item1.style.width = `${item1Width}px`;
+        item2.style.width = `${item2Width}px`;
+        lastX = e.clientX;
+      }
+    });
+
+
+
+
     let iconFolder = `data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KCjwhLS0gVXBsb2FkZWQgdG86IFNWRyBSZXBvLCB3d3cuc3ZncmVwby5jb20sIFRyYW5zZm9ybWVkIGJ5OiBTVkcgUmVwbyBNaXhlciBUb29scyAtLT4KPHN2ZyB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSIwIDAgMjQgMjQiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+Cgo8ZyBpZD0iU1ZHUmVwb19iZ0NhcnJpZXIiIHN0cm9rZS13aWR0aD0iMCIvPgoKPGcgaWQ9IlNWR1JlcG9fdHJhY2VyQ2FycmllciIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+Cgo8ZyBpZD0iU1ZHUmVwb19pY29uQ2FycmllciI+IDxwYXRoIGQ9Ik0zIDguMkMzIDcuMDc5ODkgMyA2LjUxOTg0IDMuMjE3OTkgNi4wOTIwMkMzLjQwOTczIDUuNzE1NjkgMy43MTU2OSA1LjQwOTczIDQuMDkyMDIgNS4yMTc5OUM0LjUxOTg0IDUgNS4wNzk5IDUgNi4yIDVIOS42NzQ1MkMxMC4xNjM3IDUgMTAuNDA4MyA1IDEwLjYzODUgNS4wNTUyNkMxMC44NDI1IDUuMTA0MjUgMTEuMDM3NiA1LjE4NTA2IDExLjIxNjYgNS4yOTQ3MkMxMS40MTg0IDUuNDE4NCAxMS41OTE0IDUuNTkxMzUgMTEuOTM3MyA1LjkzNzI2TDEyLjA2MjcgNi4wNjI3NEMxMi40MDg2IDYuNDA4NjUgMTIuNTgxNiA2LjU4MTYgMTIuNzgzNCA2LjcwNTI4QzEyLjk2MjQgNi44MTQ5NCAxMy4xNTc1IDYuODk1NzUgMTMuMzYxNSA2Ljk0NDc0QzEzLjU5MTcgNyAxMy44MzYzIDcgMTQuMzI1NSA3SDE3LjhDMTguOTIwMSA3IDE5LjQ4MDIgNyAxOS45MDggNy4yMTc5OUMyMC4yODQzIDcuNDA5NzMgMjAuNTkwMyA3LjcxNTY5IDIwLjc4MiA4LjA5MjAyQzIxIDguNTE5ODQgMjEgOS4wNzk5IDIxIDEwLjJWMTUuOEMyMSAxNi45MjAxIDIxIDE3LjQ4MDIgMjAuNzgyIDE3LjkwOEMyMC41OTAzIDE4LjI4NDMgMjAuMjg0MyAxOC41OTAzIDE5LjkwOCAxOC43ODJDMTkuNDgwMiAxOSAxOC45MjAxIDE5IDE3LjggMTlINi4yQzUuMDc5ODkgMTkgNC41MTk4NCAxOSA0LjA5MjAyIDE4Ljc4MkMzLjcxNTY5IDE4LjU5MDMgMy40MDk3MyAxOC4yODQzIDMuMjE3OTkgMTcuOTA4QzMgMTcuNDgwMiAzIDE2LjkyMDEgMyAxNS44VjguMloiIHN0cm9rZT0iI2ZmZmZmZiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiLz4gPC9nPgoKPC9zdmc+`;
     let iconFile = `data:image/svg+xml;base64,PCFET0NUWVBFIHN2ZyBQVUJMSUMgIi0vL1czQy8vRFREIFNWRyAxLjEvL0VOIiAiaHR0cDovL3d3dy53My5vcmcvR3JhcGhpY3MvU1ZHLzEuMS9EVEQvc3ZnMTEuZHRkIj4KCjwhLS0gVXBsb2FkZWQgdG86IFNWRyBSZXBvLCB3d3cuc3ZncmVwby5jb20sIFRyYW5zZm9ybWVkIGJ5OiBTVkcgUmVwbyBNaXhlciBUb29scyAtLT4KPHN2ZyB3aWR0aD0iMjBweCIgaGVpZ2h0PSIyMHB4IiB2aWV3Qm94PSIwIDAgMjQuMDAgMjQuMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgc3Ryb2tlPSIjZmZmZmZmIj4KCjxnIGlkPSJTVkdSZXBvX2JnQ2FycmllciIgc3Ryb2tlLXdpZHRoPSIwIi8+Cgo8ZyBpZD0iU1ZHUmVwb190cmFjZXJDYXJyaWVyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIHN0cm9rZT0iI0NDQ0NDQyIgc3Ryb2tlLXdpZHRoPSIwLjA0OCIvPgoKPGcgaWQ9IlNWR1JlcG9faWNvbkNhcnJpZXIiPiA8cGF0aCBkPSJNMTMgM0wxMy43MDcxIDIuMjkyODlDMTMuNTE5NiAyLjEwNTM2IDEzLjI2NTIgMiAxMyAyVjNaTTE5IDlIMjBDMjAgOC43MzQ3OCAxOS44OTQ2IDguNDgwNDMgMTkuNzA3MSA4LjI5Mjg5TDE5IDlaTTEzLjEwOSA4LjQ1Mzk5TDE0IDhWOEwxMy4xMDkgOC40NTM5OVpNMTMuNTQ2IDguODkxMDFMMTQgOEwxMy41NDYgOC44OTEwMVpNMTAgMTNDMTAgMTIuNDQ3NyA5LjU1MjI4IDEyIDkgMTJDOC40NDc3MiAxMiA4IDEyLjQ0NzcgOCAxM0gxMFpNOCAxNkM4IDE2LjU1MjMgOC40NDc3MiAxNyA5IDE3QzkuNTUyMjggMTcgMTAgMTYuNTUyMyAxMCAxNkg4Wk04LjUgOUM3Ljk0NzcyIDkgNy41IDkuNDQ3NzIgNy41IDEwQzcuNSAxMC41NTIzIDcuOTQ3NzIgMTEgOC41IDExVjlaTTkuNSAxMUMxMC4wNTIzIDExIDEwLjUgMTAuNTUyMyAxMC41IDEwQzEwLjUgOS40NDc3MiAxMC4wNTIzIDkgOS41IDlWMTFaTTguNSA2QzcuOTQ3NzIgNiA3LjUgNi40NDc3MiA3LjUgN0M3LjUgNy41NTIyOCA3Ljk0NzcyIDggOC41IDhWNlpNOS41IDhDMTAuMDUyMyA4IDEwLjUgNy41NTIyOCAxMC41IDdDMTAuNSA2LjQ0NzcyIDEwLjA1MjMgNiA5LjUgNlY4Wk0xNy45MDggMjAuNzgyTDE3LjQ1NCAxOS44OTFMMTcuNDU0IDE5Ljg5MUwxNy45MDggMjAuNzgyWk0xOC43ODIgMTkuOTA4TDE5LjY3MyAyMC4zNjJMMTguNzgyIDE5LjkwOFpNNS4yMTc5OSAxOS45MDhMNC4zMjY5OCAyMC4zNjJINC4zMjY5OEw1LjIxNzk5IDE5LjkwOFpNNi4wOTIwMiAyMC43ODJMNi41NDYwMSAxOS44OTFMNi41NDYwMSAxOS44OTFMNi4wOTIwMiAyMC43ODJaTTYuMDkyMDIgMy4yMTc5OUw1LjYzODAzIDIuMzI2OThMNS42MzgwMyAyLjMyNjk4TDYuMDkyMDIgMy4yMTc5OVpNNS4yMTc5OSA0LjA5MjAyTDQuMzI2OTggMy42MzgwM0w0LjMyNjk4IDMuNjM4MDNMNS4yMTc5OSA0LjA5MjAyWk0xMiAzVjcuNEgxNFYzSDEyWk0xNC42IDEwSDE5VjhIMTQuNlYxMFpNMTIgNy40QzEyIDcuNjYzNTMgMTEuOTk5MiA3LjkyMTMxIDEyLjAxNjkgOC4xMzgyM0MxMi4wMzU2IDguMzY2ODIgMTIuMDc5NyA4LjYzNjU2IDEyLjIxOCA4LjkwNzk4TDE0IDhDMTQuMDI5MyA4LjA1NzUxIDE0LjAxODkgOC4wODAyOCAxNC4wMTAzIDcuOTc1MzdDMTQuMDAwOCA3Ljg1ODc4IDE0IDcuNjk2NTMgMTQgNy40SDEyWk0xNC42IDhDMTQuMzAzNSA4IDE0LjE0MTIgNy45OTkyMiAxNC4wMjQ2IDcuOTg5N0MxMy45MTk3IDcuOTgxMTMgMTMuOTQyNSA3Ljk3MDcgMTQgOEwxMy4wOTIgOS43ODIwMUMxMy4zNjM0IDkuOTIwMzEgMTMuNjMzMiA5Ljk2NDM4IDEzLjg2MTggOS45ODMwNUMxNC4wNzg3IDEwLjAwMDggMTQuMzM2NSAxMCAxNC42IDEwVjhaTTEyLjIxOCA4LjkwNzk4QzEyLjQwOTcgOS4yODQzIDEyLjcxNTcgOS41OTAyNyAxMy4wOTIgOS43ODIwMUwxNCA4VjhMMTIuMjE4IDguOTA3OThaTTggMTNWMTZIMTBWMTNIOFpNOC41IDExSDkuNVY5SDguNVYxMVpNOC41IDhIOS41VjZIOC41VjhaTTEzIDJIOC4yVjRIMTNWMlpNNCA2LjJWMTcuOEg2VjYuMkg0Wk04LjIgMjJIMTUuOFYyMEg4LjJWMjJaTTIwIDE3LjhWOUgxOFYxNy44SDIwWk0xOS43MDcxIDguMjkyODlMMTMuNzA3MSAyLjI5Mjg5TDEyLjI5MjkgMy43MDcxMUwxOC4yOTI5IDkuNzA3MTFMMTkuNzA3MSA4LjI5Mjg5Wk0xNS44IDIyQzE2LjM0MzYgMjIgMTYuODExNCAyMi4wMDA4IDE3LjE5NSAyMS45Njk0QzE3LjU5MDQgMjEuOTM3MSAxNy45ODM2IDIxLjg2NTggMTguMzYyIDIxLjY3M0wxNy40NTQgMTkuODkxQzE3LjQwNDUgMTkuOTE2MiAxNy4zMDM4IDE5Ljk1MzkgMTcuMDMyMiAxOS45NzYxQzE2Ljc0ODggMTkuOTk5MiAxNi4zNzY2IDIwIDE1LjggMjBWMjJaTTE4IDE3LjhDMTggMTguMzc2NiAxNy45OTkyIDE4Ljc0ODggMTcuOTc2MSAxOS4wMzIyQzE3Ljk1MzkgMTkuMzAzOCAxNy45MTYyIDE5LjQwNDUgMTcuODkxIDE5LjQ1NEwxOS42NzMgMjAuMzYyQzE5Ljg2NTggMTkuOTgzNiAxOS45MzcxIDE5LjU5MDQgMTkuOTY5NCAxOS4xOTVDMjAuMDAwOCAxOC44MTE0IDIwIDE4LjM0MzYgMjAgMTcuOEgxOFpNMTguMzYyIDIxLjY3M0MxOC45MjY1IDIxLjM4NTQgMTkuMzg1NCAyMC45MjY1IDE5LjY3MyAyMC4zNjJMMTcuODkxIDE5LjQ1NEMxNy43OTUxIDE5LjY0MjIgMTcuNjQyMiAxOS43OTUxIDE3LjQ1NCAxOS44OTFMMTguMzYyIDIxLjY3M1pNNCAxNy44QzQgMTguMzQzNiAzLjk5OTIyIDE4LjgxMTQgNC4wMzA1NyAxOS4xOTVDNC4wNjI4NyAxOS41OTA0IDQuMTM0MTkgMTkuOTgzNiA0LjMyNjk4IDIwLjM2Mkw2LjEwODk5IDE5LjQ1NEM2LjA4MzggMTkuNDA0NSA2LjA0NjEyIDE5LjMwMzggNi4wMjM5MyAxOS4wMzIyQzYuMDAwNzggMTguNzQ4OCA2IDE4LjM3NjYgNiAxNy44SDRaTTguMiAyMEM3LjYyMzQ1IDIwIDcuMjUxMTcgMTkuOTk5MiA2Ljk2Nzg0IDE5Ljk3NjFDNi42OTYxNyAxOS45NTM5IDYuNTk1NDUgMTkuOTE2MiA2LjU0NjAxIDE5Ljg5MUw1LjYzODAzIDIxLjY3M0M2LjAxNjQxIDIxLjg2NTggNi40MDk2MyAyMS45MzcxIDYuODA0OTcgMjEuOTY5NEM3LjE4ODY0IDIyLjAwMDggNy42NTY0NSAyMiA4LjIgMjJWMjBaTTQuMzI2OTggMjAuMzYyQzQuNjE0NiAyMC45MjY1IDUuMDczNTQgMjEuMzg1NCA1LjYzODAzIDIxLjY3M0w2LjU0NjAxIDE5Ljg5MUM2LjM1Nzg1IDE5Ljc5NTEgNi4yMDQ4NyAxOS42NDIyIDYuMTA4OTkgMTkuNDU0TDQuMzI2OTggMjAuMzYyWk04LjIgMkM3LjY1NjQ1IDIgNy4xODg2NCAxLjk5OTIyIDYuODA0OTcgMi4wMzA1N0M2LjQwOTYzIDIuMDYyODcgNi4wMTY0MSAyLjEzNDE5IDUuNjM4MDMgMi4zMjY5OEw2LjU0NjAxIDQuMTA4OTlDNi41OTU0NSA0LjA4MzggNi42OTYxNyA0LjA0NjEyIDYuOTY3ODQgNC4wMjM5M0M3LjI1MTE3IDQuMDAwNzggNy42MjM0NSA0IDguMiA0VjJaTTYgNi4yQzYgNS42MjM0NSA2LjAwMDc4IDUuMjUxMTcgNi4wMjM5MyA0Ljk2Nzg0QzYuMDQ2MTIgNC42OTYxNyA2LjA4MzggNC41OTU0NSA2LjEwODk5IDQuNTQ2MDFMNC4zMjY5OCAzLjYzODAzQzQuMTM0MTkgNC4wMTY0MSA0LjA2Mjg3IDQuNDA5NjMgNC4wMzA1NyA0LjgwNDk3QzMuOTk5MjIgNS4xODg2NCA0IDUuNjU2NDUgNCA2LjJINlpNNS42MzgwMyAyLjMyNjk4QzUuMDczNTQgMi42MTQ2IDQuNjE0NiAzLjA3MzU0IDQuMzI2OTggMy42MzgwM0w2LjEwODk5IDQuNTQ2MDFDNi4yMDQ4NyA0LjM1Nzg1IDYuMzU3ODUgNC4yMDQ4NyA2LjU0NjAxIDQuMTA4OTlMNS42MzgwMyAyLjMyNjk4WiIgZmlsbD0iI2ZmZmZmZiIvPiA8L2c+Cgo8L3N2Zz4=`;
     let fileSet = '';
-    let extType = ['php', 'js', 'json', 'py', 'txt', 'md', 'html', 'css', 'yml', 'env','htaccess'];
+    let extType = ['php', 'js', 'json', 'sh', 'py', 'txt', 'md', 'html', 'css', 'yml', 'env','htaccess'];
     let extMedia = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'mp4', 'mp3', 'zip', 'rar', 'iso','ico','doc', 'docx', 'xls', 'xlsx', 'pdf', 'sql', 'gz'];
     let beautify = ace.require("ace/ext/beautify");
     let editor = ace.edit("editor");
@@ -1196,7 +1249,8 @@ $GLOBALS["contentScript"] = <<<'EOT'
     
     
     editor.setOptions({
-      fontSize: "11pt"
+        fontFamily: "Fira Code",
+        fontSize: "11pt"
     });
     
     function _id(a){
@@ -1427,6 +1481,7 @@ $GLOBALS["contentScript"] = <<<'EOT'
                         e.el.addEventListener('contextmenu', function(event) {
                             // Mencegah tindakan default dari menu konteks muncul
                             event.preventDefault();
+                            event.stopPropagation()
                             
                             let type = event.target.dataset.type;
                             let path = event.target.dataset.path;
@@ -1514,28 +1569,29 @@ $GLOBALS["contentScript"] = <<<'EOT'
                                     let contentType = filePath.split('.').pop();
                                     if(contentType == 'php'){
                                         editor.getSession().setMode("ace/mode/php");
-                                    }
-                                    if(contentType == 'js'){
+                                    }else if(contentType == 'js'){
                                         editor.getSession().setMode("ace/mode/javascript");
-                                    }
-                                    if(contentType == 'css'){
+                                    }else if(contentType == 'css'){
                                         editor.getSession().setMode("ace/mode/css");
+                                    }else if(contentType == 'html'){
+                                        editor.getSession().setMode("ace/mode/html");
+                                    }else if(contentType == 'py'){
+                                        editor.getSession().setMode("ace/mode/python");
+                                    }else if(contentType == 'sh'){
+                                        editor.getSession().setMode("ace/mode/sh");
+                                    }else if(contentType == 'sql'){
+                                        editor.getSession().setMode("ace/mode/sql");
+                                    }else if(contentType == 'md'){
+                                        editor.getSession().setMode("ace/mode/markdown");
+                                    }else{
+                                        editor.getSession().setMode("ace/mode/plain_text");
                                     }
-                                    editor.setValue(r.code, -1)
+                                    editor.setValue(r.code, -1);
                                 })
                             }else{
                                 if(extMedia.indexOf(ext) == -1){
                                     apiFetch(lnkfile+filePath, [], function(r){
-                                        let contentType = filePath.split('.').pop();
-                                        if(contentType == 'php'){
-                                            editor.getSession().setMode("ace/mode/php");
-                                        }
-                                        if(contentType == 'js'){
-                                            editor.getSession().setMode("ace/mode/javascript");
-                                        }
-                                        if(contentType == 'css'){
-                                            editor.getSession().setMode("ace/mode/css");
-                                        }
+                                        editor.getSession().setMode("ace/mode/plain_text");
                                         editor.setValue(r.code, -1)
                                     })
                                 }else{
@@ -1707,6 +1763,8 @@ ErrorHandler::cek(function(){
             "css" => [
                 "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
                 ,"https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
+                ,"https://cdnjs.cloudflare.com/ajax/libs/firacode/6.2.0/fira_code.css"
+                ,"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
             ],
             "script" => [
                 "https://cdn.tailwindcss.com"
@@ -1722,9 +1780,9 @@ ErrorHandler::cek(function(){
         ]);
         
         
-        $GLOBALS[contentBody] .="<script src=\"/ace.php/content/script.js?v=".date('Ymdhis')."\"></script>";
+        $GLOBALS['contentBody'] .="<script src=\"/ace.php/content/script.js?v=".date('Ymdhis')."\"></script>";
         $html->body(
-            $GLOBALS[contentBody]
+            $GLOBALS['contentBody']
         );
         $html->get();
     })
@@ -1776,7 +1834,7 @@ ErrorHandler::cek(function(){
     
     $route->add('/loginprocess', function(){
         $urlArea = ULRAREA;
-        if( md5(sha1($_POST['password'])) == PASSWORD && $_POST['username'] == USERNAME ){
+        if( md5(sha1(htmlspecialchars($_POST['password']))) == PASSWORD && htmlspecialchars($_POST['username']) == USERNAME ){
             Session::put('login', [
                 "status" => "success"
             ]);
